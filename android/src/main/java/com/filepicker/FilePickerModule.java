@@ -52,11 +52,11 @@ public class FileChooserModule extends ReactContextBaseJavaModule implements Act
 
     @Override
     public String getName() {
-        return "FileChooserManager";
+        return "FileChooser";
     }
 
     @ReactMethod
-    public void showFileChooser(final ReadableMap options, final Callback callback) {
+    public void show(final ReadableMap options, final Callback callback) {
         Activity currentActivity = getCurrentActivity();
         WritableMap response = Arguments.createMap();
 
