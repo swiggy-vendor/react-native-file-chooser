@@ -10,7 +10,7 @@ Based on [react-native-image-chooser](https://github.com/marcshilling/react-nati
 This component does not currently work on iOS, instead use [react-native-document-chooser](https://github.com/Elyx0/react-native-document-chooser)
 
 ### Android
-1. `npm install react-native-file-chooser2 --save`
+1. `npm install react-native-file-chooser --save`
 
 ```gradle
 // file: android/settings.gradle
@@ -67,14 +67,15 @@ public class MainApplication extends Application implements ReactApplication {
 1. In your React Native javascript code, bring in the native module:
 
   ```javascript
-const FileChooserManager = require('NativeModules').FileChooserManager;
+import { NativeModules } from 'react-native'
+const FilePicker = NativeModules.FileChooser
   ```
 2. Use it like so:
 
   When you want to display the chooser:
   ```javascript
 
-  FileChooserManager.showFileChooser(null, (response) => {
+  FilePicker.show(null, (response) => {
     console.log('Response = ', response);
 
     if (response.didCancel) {
