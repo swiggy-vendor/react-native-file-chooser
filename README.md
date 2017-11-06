@@ -75,7 +75,12 @@ const FilePicker = NativeModules.FileChooser
   When you want to display the chooser:
   ```javascript
 
-  FilePicker.show(null, (response) => {
+FilePicker.show(
+  {
+    title: 'Audio Picker',
+    mimeType: 'audio/*',
+  }, 
+  (response) => {
     console.log('Response = ', response);
 
     if (response.didCancel) {
