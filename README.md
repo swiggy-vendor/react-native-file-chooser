@@ -1,4 +1,4 @@
-# react-native-file-picker
+# react-native-audio-picker
 A React Native module that allows you to use native UI to select a file from the device library
 Based on [react-native-image-picker](https://github.com/marcshilling/react-native-image-picker)
 
