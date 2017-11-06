@@ -37,11 +37,8 @@ import java.io.BufferedOutputStream;
 import java.io.OutputStream;
 
 public class FileChooserModule extends ReactContextBaseJavaModule implements ActivityEventListener {
-
-    static final int REQUEST_LAUNCH_FILE_CHOOSER = 2;
-
+    static final int REQUEST_LAUNCH_FILE_CHOOSER = 123456;
     private final ReactApplicationContext mReactContext;
-
     private Callback mCallback;
     WritableMap response;
 
@@ -61,7 +58,7 @@ public class FileChooserModule extends ReactContextBaseJavaModule implements Act
     @ReactMethod
     public void showFileChooser(final ReadableMap options, final Callback callback) {
         Activity currentActivity = getCurrentActivity();
-        response = Arguments.createMap();
+        WritableMap response = Arguments.createMap();
 
         if (currentActivity == null) {
             response.putString("error", "can't find current Activity");
@@ -69,26 +66,11 @@ public class FileChooserModule extends ReactContextBaseJavaModule implements Act
             return;
         }
 
-                launchFileChooser(callback);
-    }
+        String mimeType = options.getString('mimeType')
+        String title = options.getString('title')
 
-    // NOTE: Currently not reentrant / doesn't support concurrent requests
-    @ReactMethod
-    public void launchFileChooser(final Callback callback) {
-        int requestCode;
-        Intent libraryIntent;
-        response = Arguments.createMap();
-        Activity currentActivity = getCurrentActivity();
-
-        if (currentActivity == null) {
-            response.putString("error", "can't find current Activity");
-            callback.invoke(response);
-            return;
-        }
-
-        requestCode = REQUEST_LAUNCH_FILE_CHOOSER;
-        libraryIntent = new Intent(Intent.ACTION_GET_CONTENT);
-        libraryIntent.setType("*/*");
+        Intent libraryIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        libraryIntent.setType(type == null ? "*/*" : type);
         libraryIntent.addCategory(Intent.CATEGORY_OPENABLE);
 
         if (libraryIntent.resolveActivity(mReactContext.getPackageManager()) == null) {
@@ -100,7 +82,10 @@ public class FileChooserModule extends ReactContextBaseJavaModule implements Act
         mCallback = callback;
 
         try {
-            currentActivity.startActivityForResult(Intent.createChooser(libraryIntent, "Select file to Upload"), requestCode);
+            currentActivity.startActivityForResult(
+              Intent.createChooser(libraryIntent, title == null ? "Select file to Upload" : title),
+              REQUEST_LAUNCH_FILE_CHOOSER
+            );
         } catch (ActivityNotFoundException e) {
             e.printStackTrace();
         }
@@ -108,40 +93,39 @@ public class FileChooserModule extends ReactContextBaseJavaModule implements Act
 
     // R.N > 33
     public void onActivityResult(final Activity activity, final int requestCode, final int resultCode, final Intent data) {
-      onActivityResult(requestCode, resultCode, data);
+        onActivityResult(requestCode, resultCode, data);
     }
 
     public void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
+        WritableMap response = Arguments.createMap();
 
-      //robustness code
-      if (mCallback == null || requestCode != REQUEST_LAUNCH_FILE_CHOOSER) {
-        return;
-      }
-      // user cancel
-      if (resultCode != Activity.RESULT_OK) {
-          response.putBoolean("didCancel", true);
-          mCallback.invoke(response);
-          return;
-      }
+        //robustness code
+        if (mCallback == null || requestCode != REQUEST_LAUNCH_FILE_CHOOSER) {
+            return;
+        }
+        // user cancel
+        if (resultCode != Activity.RESULT_OK) {
+            response.putBoolean("didCancel", true);
+            mCallback.invoke(response);
+            return;
+        }
 
-      Activity currentActivity = getCurrentActivity();
+        Activity currentActivity = getCurrentActivity();
 
-      Uri uri = data.getData();
-      response.putString("uri", data.getData().toString());
-      String path = null;
-      path = getPath(currentActivity, uri);
-      if (path != null) {
-          response.putString("path", path);
-      }else{
-          path = getFileFromUri(currentActivity, uri);
-          if(!path.equals("error")){
-              response.putString("path", path);
-          }
-      }
-      mCallback.invoke(response);
+        Uri uri = data.getData();
+        response.putString("uri", data.getData().toString());
+        String path = getPath(currentActivity, uri);
+
+        if (path != null) {
+            response.putString("path", path);
+        } else {
+            path = getFileFromUri(currentActivity, uri);
+            if (!path.equals("error")) {
+                response.putString("path", path);
+            }
+        }
+        mCallback.invoke(response);
     }
-
-
 
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
@@ -169,7 +153,7 @@ public class FileChooserModule extends ReactContextBaseJavaModule implements Act
 
                 final String id = DocumentsContract.getDocumentId(uri);
                 final Uri contentUri = ContentUris.withAppendedId(
-                        Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
+                    Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
 
                 return getDataColumn(context, contentUri, null, null);
             }
@@ -189,8 +173,8 @@ public class FileChooserModule extends ReactContextBaseJavaModule implements Act
                 }
 
                 final String selection = "_id=?";
-                final String[] selectionArgs = new String[]{
-                        split[1]
+                final String[] selectionArgs = new String[] {
+                    split[1]
                 };
 
                 return getDataColumn(context, contentUri, selection, selectionArgs);
@@ -246,17 +230,17 @@ public class FileChooserModule extends ReactContextBaseJavaModule implements Act
     }
 
     public static String getDataColumn(Context context, Uri uri, String selection,
-                                       String[] selectionArgs) {
+        String[] selectionArgs) {
 
         Cursor cursor = null;
         final String column = "_data";
         final String[] projection = {
-                column
+            column
         };
 
         try {
             cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs,
-                    null);
+                null);
             if (cursor != null && cursor.moveToFirst()) {
                 final int column_index = cursor.getColumnIndexOrThrow(column);
                 return cursor.getString(column_index);
@@ -268,58 +252,57 @@ public class FileChooserModule extends ReactContextBaseJavaModule implements Act
         return null;
     }
 
-    private String getFileFromUri(Activity activity, Uri uri){
-      //If it can't get path of file, file is saved in cache, and obtain path from there
-      try {
-        String filePath = activity.getCacheDir().toString();
-        String fileName = getFileNameFromUri(activity, uri);
-        String path = filePath + "/" + fileName;
-        if(!fileName.equals("error") && saveFileOnCache(path, activity, uri)){
-          return path;
-        }else{
-          return "error";
+    private String getFileFromUri(Activity activity, Uri uri) {
+        //If it can't get path of file, file is saved in cache, and obtain path from there
+        try {
+            String filePath = activity.getCacheDir().toString();
+            String fileName = getFileNameFromUri(activity, uri);
+            String path = filePath + "/" + fileName;
+            if (!fileName.equals("error") && saveFileOnCache(path, activity, uri)) {
+                return path;
+            } else {
+                return "error";
+            }
+        } catch (Exception e) {
+            //Log.d("FileChooserModule", "Error getFileFromStream");
+            return "error";
         }
-      } catch (Exception e) {
-        //Log.d("FileChooserModule", "Error getFileFromStream");
-        return "error";
-      }
     }
 
-    private String getFileNameFromUri(Activity activity, Uri uri){
-      Cursor cursor = activity.getContentResolver().query(uri, null, null, null, null);
-      if (cursor != null && cursor.moveToFirst()) {
-          final int column_index = cursor.getColumnIndexOrThrow("_display_name");
-          return cursor.getString(column_index);
-      }else{
-        return "error";
-      }
+    private String getFileNameFromUri(Activity activity, Uri uri) {
+        Cursor cursor = activity.getContentResolver().query(uri, null, null, null, null);
+        if (cursor != null && cursor.moveToFirst()) {
+            final int column_index = cursor.getColumnIndexOrThrow("_display_name");
+            return cursor.getString(column_index);
+        } else {
+            return "error";
+        }
     }
 
-    private boolean saveFileOnCache(String path, Activity activity, Uri uri){
-      //Log.d("FileChooserModule", "saveFileOnCache path: "+path);
-      try {
-        InputStream is = activity.getContentResolver().openInputStream(uri);
-        OutputStream stream = new BufferedOutputStream(new FileOutputStream(path));
-        int bufferSize = 1024;
-        byte[] buffer = new byte[bufferSize];
-        int len = 0;
-        while ((len = is.read(buffer)) != -1) {
-            stream.write(buffer, 0, len);
+    private boolean saveFileOnCache(String path, Activity activity, Uri uri) {
+        //Log.d("FileChooserModule", "saveFileOnCache path: "+path);
+        try {
+            InputStream is = activity.getContentResolver().openInputStream(uri);
+            OutputStream stream = new BufferedOutputStream(new FileOutputStream(path));
+            byte[] buffer = new byte[1024];
+            int len = 0;
+
+            while ((len = is.read(buffer)) != -1)
+                stream.write(buffer, 0, len);
+
+            if (stream != null)
+                stream.close();
+
+            //Log.d("FileChooserModule", "saveFileOnCache done!");
+            return true;
+
+        } catch (Exception e) {
+            //Log.d("FileChooserModule", "saveFileOnCache error");
+            return false;
         }
-
-        if(stream!=null)
-            stream.close();
-
-        //Log.d("FileChooserModule", "saveFileOnCache done!");
-        return true;
-
-      } catch (Exception e) {
-        //Log.d("FileChooserModule", "saveFileOnCache error");
-        return false;
-      }
     }
 
     // Required for RN 0.30+ modules than implement ActivityEventListener
-    public void onNewIntent(Intent intent) { }
+    public void onNewIntent(Intent intent) {}
 
 }
