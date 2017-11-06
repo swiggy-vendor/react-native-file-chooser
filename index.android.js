@@ -1,19 +1,19 @@
 'use strict'
 
 const { NativeModules } = require('react-native');
-const { FilePickerManager } = NativeModules;
+const { FileChooserManager } = NativeModules;
 const DEFAULT_OPTIONS = {
-    title: 'File Picker',
+    title: 'File Chooser',
     chooseFileButtonTitle: 'Choose File...'
 };
 
 module.exports = {
-  ...FilePickerManager,
-  showFilePicker: function showFilePicker(options, callback) {
+  ...FileChooserManager,
+  showFileChooser: function showFileChooser(options, callback) {
     if (typeof options === 'function') {
       callback = options;
       options = {};
     }
-    return FilePickerManager.showFilePicker({...DEFAULT_OPTIONS, ...options}, callback)
+    return FileChooserManager.showFileChooser({...DEFAULT_OPTIONS, ...options}, callback)
   }
 }

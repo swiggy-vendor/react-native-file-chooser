@@ -1,11 +1,12 @@
 {
-  "name": "react-native-audio-picker",
+  "name": "react-native-file-chooser",
   "version": "0.0.9",
   "description": "A React Native module that allows you to use native UI to select file from the device library on Android",
   "main": "index.android.js",
+  "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jeremistadler/react-native-audio-picker"
+    "url": "https://github.com/jeremistadler/react-native-file-chooser"
   },
   "nativePackage": true,
   "author": "Luis Fuertes <luis.fuertes@clouddistrict.com>",
@@ -15,16 +16,13 @@
       "email": "stadler.jeremi@gmail.com"
     }
   ],
-  "license": "ISC",
   "keywords": [
     "react-native",
-    "react-native-file-picker",
-    "react-native-audio-picker",
+    "react-native-file-chooser",
     "react",
     "native",
     "file",
-    "audio",
-    "picker",
+    "chooser",
     "android"
   ]
 }

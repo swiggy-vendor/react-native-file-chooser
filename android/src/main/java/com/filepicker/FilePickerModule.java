@@ -1,4 +1,4 @@
-package com.filepicker;
+package com.filechooser;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -36,7 +36,7 @@ import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.OutputStream;
 
-public class FilePickerModule extends ReactContextBaseJavaModule implements ActivityEventListener {
+public class FileChooserModule extends ReactContextBaseJavaModule implements ActivityEventListener {
 
     static final int REQUEST_LAUNCH_FILE_CHOOSER = 2;
 
@@ -45,7 +45,7 @@ public class FilePickerModule extends ReactContextBaseJavaModule implements Acti
     private Callback mCallback;
     WritableMap response;
 
-    public FilePickerModule(ReactApplicationContext reactContext) {
+    public FileChooserModule(ReactApplicationContext reactContext) {
         super(reactContext);
 
         reactContext.addActivityEventListener(this);
@@ -55,11 +55,11 @@ public class FilePickerModule extends ReactContextBaseJavaModule implements Acti
 
     @Override
     public String getName() {
-        return "FilePickerManager";
+        return "FileChooserManager";
     }
 
     @ReactMethod
-    public void showFilePicker(final ReadableMap options, final Callback callback) {
+    public void showFileChooser(final ReadableMap options, final Callback callback) {
         Activity currentActivity = getCurrentActivity();
         response = Arguments.createMap();
 
@@ -280,7 +280,7 @@ public class FilePickerModule extends ReactContextBaseJavaModule implements Acti
           return "error";
         }
       } catch (Exception e) {
-        //Log.d("FilePickerModule", "Error getFileFromStream");
+        //Log.d("FileChooserModule", "Error getFileFromStream");
         return "error";
       }
     }
@@ -296,7 +296,7 @@ public class FilePickerModule extends ReactContextBaseJavaModule implements Acti
     }
 
     private boolean saveFileOnCache(String path, Activity activity, Uri uri){
-      //Log.d("FilePickerModule", "saveFileOnCache path: "+path);
+      //Log.d("FileChooserModule", "saveFileOnCache path: "+path);
       try {
         InputStream is = activity.getContentResolver().openInputStream(uri);
         OutputStream stream = new BufferedOutputStream(new FileOutputStream(path));
@@ -310,11 +310,11 @@ public class FilePickerModule extends ReactContextBaseJavaModule implements Acti
         if(stream!=null)
             stream.close();
 
-        //Log.d("FilePickerModule", "saveFileOnCache done!");
+        //Log.d("FileChooserModule", "saveFileOnCache done!");
         return true;
 
       } catch (Exception e) {
-        //Log.d("FilePickerModule", "saveFileOnCache error");
+        //Log.d("FileChooserModule", "saveFileOnCache error");
         return false;
       }
     }

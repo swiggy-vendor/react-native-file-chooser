@@ -7,7 +7,7 @@ const {
   PixelRatio,
   TouchableOpacity,
   Image,
-  NativeModules: { FilePickerManager },
+  NativeModules: { FileChooserManager },
 } = React
 
 export default class App extends React.Component {
@@ -17,17 +17,17 @@ export default class App extends React.Component {
 
   selectFileTapped() {
     const options = {
-      title: 'File Picker',
+      title: 'File Chooser',
       chooseFileButtonTitle: 'Choose File...',
     }
 
-    FilePickerManager.showFilePicker(options, response => {
+    FileChooserManager.showFileChooser(options, response => {
       console.log('Response = ', response)
 
       if (response.didCancel) {
-        console.log('User cancelled photo picker')
+        console.log('User cancelled photo chooser')
       } else if (response.error) {
-        console.log('ImagePickerManager Error: ', response.error)
+        console.log('ImageChooserManager Error: ', response.error)
       } else if (response.customButton) {
         console.log('User tapped custom button: ', response.customButton)
       } else {

@@ -2,5 +2,5 @@ rootProject.name = 'Example'
 
 include ':app'
 
-include ':react-native-file-picker'
-project(':react-native-file-picker').projectDir = new File(settingsDir, '../../android')
+include ':react-native-file-chooser'
+project(':react-native-file-chooser').projectDir = new File(settingsDir, '../../android')
