@@ -68,7 +68,7 @@ public class MainApplication extends Application implements ReactApplication {
 
   ```javascript
 import { NativeModules } from 'react-native'
-const FilePicker = NativeModules.FilePickerManager
+const FilePicker = NativeModules.FileChooser
   ```
 2. Use it like so:
 
