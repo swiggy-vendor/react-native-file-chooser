@@ -66,8 +66,8 @@ public class FileChooserModule extends ReactContextBaseJavaModule implements Act
             return;
         }
 
-        String mimeType = options.getString("mimeType")
-        String title = options.getString("title")
+        String mimeType = options.getString("mimeType");
+        String title = options.getString("title");
 
         Intent libraryIntent = new Intent(Intent.ACTION_GET_CONTENT);
         libraryIntent.setType(mimeType == null ? "*/*" : mimeType);
