@@ -2,7 +2,7 @@
 A React Native module that allows you to use native UI to select a file from the device library
 Based on [react-native-image-chooser](https://github.com/marcshilling/react-native-image-chooser)
 
-Thanks to [@Lichwa](https://github.com/Lichwa) for creating this component
+- Supports choosing files from Google Drive
 
 ## Install
 
@@ -90,7 +90,3 @@ const FileChooserManager = require('NativeModules').FileChooserManager;
     }
   });
   ```
-
-## News
-### Compatible with all versions of RN
-### Compatible with files from Google Drive
