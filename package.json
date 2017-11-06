@@ -1,6 +1,6 @@
 {
   "name": "react-native-file-chooser",
-  "version": "0.0.10",
+  "version": "0.1.0",
   "description": "A React Native module that allows you to use native UI to select file from the device library on Android",
   "main": "index.android.js",
   "license": "ISC",
