@@ -66,11 +66,11 @@ public class FileChooserModule extends ReactContextBaseJavaModule implements Act
             return;
         }
 
-        String mimeType = options.getString("mimeType");
-        String title = options.getString("title");
+        String mimeType = options.hasKey("mimeType") ? options.getString("mimeType") : "*/*";
+        String title = options.hasKey("title") ? options.getString("title") : "Select file to Upload";
 
         Intent libraryIntent = new Intent(Intent.ACTION_GET_CONTENT);
-        libraryIntent.setType(mimeType == null ? "*/*" : mimeType);
+        libraryIntent.setType(mimeType);
         libraryIntent.addCategory(Intent.CATEGORY_OPENABLE);
 
         if (libraryIntent.resolveActivity(mReactContext.getPackageManager()) == null) {
@@ -83,7 +83,7 @@ public class FileChooserModule extends ReactContextBaseJavaModule implements Act
 
         try {
             currentActivity.startActivityForResult(
-              Intent.createChooser(libraryIntent, title == null ? "Select file to Upload" : title),
+              Intent.createChooser(libraryIntent, title),
               REQUEST_LAUNCH_FILE_CHOOSER
             );
         } catch (ActivityNotFoundException e) {
