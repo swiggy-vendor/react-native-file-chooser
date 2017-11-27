@@ -124,6 +124,7 @@ public class FileChooserModule extends ReactContextBaseJavaModule implements Act
                 response.putString("path", path);
             }
         }
+
         mCallback.invoke(response);
     }
 
@@ -150,12 +151,16 @@ public class FileChooserModule extends ReactContextBaseJavaModule implements Act
             }
             // DownloadsProvider
             else if (isDownloadsDocument(uri)) {
+                try {
+                    final String id = DocumentsContract.getDocumentId(uri);
+                    final Uri contentUri = ContentUris.withAppendedId(
+                        Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
 
-                final String id = DocumentsContract.getDocumentId(uri);
-                final Uri contentUri = ContentUris.withAppendedId(
-                    Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
-
-                return getDataColumn(context, contentUri, null, null);
+                    return getDataColumn(context, contentUri, null, null);
+                }
+                catch (NumberFormatException ex) {
+                    return null;
+                }
             }
             // MediaProvider
             else if (isMediaDocument(uri)) {
