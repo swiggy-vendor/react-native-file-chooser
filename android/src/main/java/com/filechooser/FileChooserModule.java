@@ -1,5 +1,6 @@
 package com.filechooser;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -8,12 +9,14 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 
@@ -62,6 +65,13 @@ public class FileChooserModule extends ReactContextBaseJavaModule implements Act
 
         if (currentActivity == null) {
             response.putString("error", "can't find current Activity");
+            callback.invoke(response);
+            return;
+        }
+
+        if (!permissionsCheck(currentActivity)) {
+            response.putBoolean("didRequestPermission", true);
+            response.putString("option", "launchFileChooser");
             callback.invoke(response);
             return;
         }
@@ -123,6 +133,13 @@ public class FileChooserModule extends ReactContextBaseJavaModule implements Act
             if (!path.equals("error")) {
                 response.putString("path", path);
             }
+        }
+
+        try {
+            response.putString("type", currentActivity.getContentResolver().getType(uri));
+            response.putString("fileName", getFileNameFromUri(currentActivity, uri));
+        } catch (Exception ex) {
+            response.putString("error", ex.getMessage());
         }
 
         mCallback.invoke(response);
@@ -201,6 +218,23 @@ public class FileChooserModule extends ReactContextBaseJavaModule implements Act
 
         return null;
     }
+
+    private boolean permissionsCheck(Activity activity) {
+        int readPermission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE);
+        int writePermission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (writePermission != PackageManager.PERMISSION_GRANTED ||
+            readPermission != PackageManager.PERMISSION_GRANTED) {
+            String[] PERMISSIONS = {
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+            };
+            ActivityCompat.requestPermissions(activity, PERMISSIONS, 1);
+            return false;
+        }
+        return true;
+    }
+
 
     /**
      * @param uri The Uri to check.
