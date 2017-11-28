@@ -124,7 +124,14 @@ public class FileChooserModule extends ReactContextBaseJavaModule implements Act
 
         Uri uri = data.getData();
         response.putString("uri", data.getData().toString());
-        String path = getPath(currentActivity, uri);
+        String path = null;
+
+        try {
+            path = getPath(currentActivity, uri);
+        }
+        catch(Exception ex) {
+            response.putString("error", ex.getMessage());
+        }
 
         if (path != null) {
             response.putString("path", path);
