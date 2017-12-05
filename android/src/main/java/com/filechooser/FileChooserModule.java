@@ -16,6 +16,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.ArrayAdapter;
@@ -121,23 +122,30 @@ public class FileChooserModule extends ReactContextBaseJavaModule implements Act
         }
 
         Activity currentActivity = getCurrentActivity();
-
         Uri uri = data.getData();
-        response.putString("uri", data.getData().toString());
-        String path = getPath(currentActivity, uri);
 
-        if (path != null) {
-            response.putString("path", path);
-        } else {
-            path = getFileFromUri(currentActivity, uri);
-            if (!path.equals("error")) {
-                response.putString("path", path);
-            }
+        if (uri == null) {
+            response.putString("error", "uri is null");
+            mCallback.invoke(response);
+            return;
+        }
+
+        response.putString("uri", uri.toString());
+
+        try {
+            response.putString("fileName", getFileNameFromUri(currentActivity, uri));
+        } catch (Exception ex) {
+            response.putString("error", ex.getMessage());
         }
 
         try {
-            response.putString("type", currentActivity.getContentResolver().getType(uri));
-            response.putString("fileName", getFileNameFromUri(currentActivity, uri));
+            response.putDouble("fileSize", getFileSizeFromUri(currentActivity, uri));
+        } catch (Exception ex) {
+            response.putString("error", ex.getMessage());
+        }
+
+        try {
+            response.putString("mimeType", currentActivity.getContentResolver().getType(uri));
         } catch (Exception ex) {
             response.putString("error", ex.getMessage());
         }
@@ -318,19 +326,28 @@ public class FileChooserModule extends ReactContextBaseJavaModule implements Act
         }
     }
 
+    private long getFileSizeFromUri(Activity activity, Uri uri) {
+        Cursor cursor = activity.getContentResolver().query(uri,
+                null, null, null, null);
+        cursor.moveToFirst();
+        long size = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE));
+        cursor.close();
+        return size;
+    }
+
+
     private boolean saveFileOnCache(String path, Activity activity, Uri uri) {
         //Log.d("FileChooserModule", "saveFileOnCache path: "+path);
         try {
             InputStream is = activity.getContentResolver().openInputStream(uri);
             OutputStream stream = new BufferedOutputStream(new FileOutputStream(path));
             byte[] buffer = new byte[1024];
-            int len = 0;
+            int len;
 
             while ((len = is.read(buffer)) != -1)
                 stream.write(buffer, 0, len);
 
-            if (stream != null)
-                stream.close();
+            stream.close();
 
             //Log.d("FileChooserModule", "saveFileOnCache done!");
             return true;
