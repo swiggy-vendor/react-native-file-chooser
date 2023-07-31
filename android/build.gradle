@@ -12,6 +12,7 @@ buildscript {
 apply plugin: 'com.android.library'
 
 android {
+    namespace "com.filechooser"
     compileSdkVersion 23
     buildToolsVersion "23.0.1"
 
